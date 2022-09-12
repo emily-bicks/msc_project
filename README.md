@@ -6,5 +6,7 @@ The code is divided into the following subfolders:
 - helper_functions: utility functions called by the experiments
 - exploratory_analysis: code for the two experiments that were conducted as part of the exploratory analysis: semantic similarity of communities and user consumption patterns. There is also a readme in this folder that explains how to run each experiment.
 - recommendations: code for the experiments to evaluate the accuracy, diversity, and serendipity of several recommendation algorithms. This is also a readme in this folder that explains how to run each experiment.
+
+This project was run using Python 3.9.12
     
 
