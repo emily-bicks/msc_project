@@ -5,7 +5,7 @@ from collections import defaultdict
 import heapq
 import numpy as np
 import sys
-sys.path.insert(1, '../Helper Functions')
+sys.path.insert(1, '../helper_functions')
 import network_utils
 import eval_metrics
 from multiprocessing import Pool
@@ -13,10 +13,10 @@ from itertools import repeat
 import json
 import statistics as s
 import random
+import os
 
-def recommend(user,test_data,network):
+def recommend(user,test_data,network, top_20=False):
 
-	#Find all videos consumed by test user, sort by date, add fragment id to match nodes in network
 
 	test_user_vids = test_data.loc[(test_data['userID']==user) & (test_data['label']==1)].sort_values(by='timestamp',ascending=False)
 	test_user_vids['fragmentId'] = None
@@ -53,7 +53,8 @@ def recommend(user,test_data,network):
 				recs.append(neighbor)
 
 
-			#recs = recs[:20]
+			if top_20:
+				recs = recs[:20]
 			diversities.append(eval_metrics.content_diversity(recs,network))
 
 			serendipities.append(eval_metrics.content_serendipity(recs,user_profile,network))
@@ -96,6 +97,7 @@ def recommend(user,test_data,network):
 if __name__ == '__main__':
 
 	n_active = 20
+	top_20 = False
 
 	training_data = network_utils.load_peek_train()
 	network = network_utils.create_network(training_data, use_kcs=True)
@@ -108,12 +110,18 @@ if __name__ == '__main__':
 	final_data = defaultdict()
 
 	with Pool(5) as p:
-		results = p.starmap(recommend,zip(most_active_users,repeat(test_data),repeat(network)))
+		results = p.starmap(recommend,zip(most_active_users,repeat(test_data),repeat(network),repeat(top_20)))
 
 	for user, user_data in results:
 		final_data[user] = user_data
 
-	fn = 'results/{}.json'.format(n_active)
+	if top_20:
+		fn = 'results/baseline/top_20.json'.
+	else:
+		fn = 'results/baseline/total_set.json'
+
+	os.makedirs(os.path.dirname(fn), exist_ok=True)
+
 	with open(fn,'w') as f:
 		json.dump(final_data, f)
 
